@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: game
+  name: application-game
 spec:
   replicas: 5
   selector:
     matchLabels:
-      type: game
+      type: application-game
   template:
     metadata:
       labels:
-        type: game
+        type: application-game
     spec:
       containers:
-        - name: game
-          image: yashchandane/game:{{ .Values.image.tag }}
+        - name: application-game
+          image: omrautdoc/application-game
           ports:
             - containerPort: 80
               protocol: TCP
