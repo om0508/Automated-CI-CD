@@ -20,6 +20,7 @@ jobs:
 
       - name: Debug Environment Variables
         run: |
+          echo "Checking if secrets are available..."
           echo "SONARQUBE_HOST=${{ secrets.SONARQUBE_HOST }}"
           echo "Checking Docker Status..."
           docker version
@@ -50,6 +51,11 @@ jobs:
           docker run -d --name sonar \
             -p 9000:9000 \
             sonarqube:lts
+          echo "Waiting for SonarQube to be ready..."
+          until curl -s ${{ secrets.SONARQUBE_HOST }}/api/system/status | grep -q '"status":"UP"'; do
+            echo "Waiting for SonarQube..."
+            sleep 10
+          done
 
       - name: Install SonarQube Scanner
         run: |
@@ -59,6 +65,7 @@ jobs:
           unzip sonar-scanner.zip
           sudo mv sonar-scanner-*/ /opt/sonar-scanner
           echo "export PATH=\"$PATH:/opt/sonar-scanner/bin\"" >> $GITHUB_ENV
+          source $GITHUB_ENV
 
       - name: Verify SonarQube Connection
         run: |
