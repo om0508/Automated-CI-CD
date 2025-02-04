@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarQubeScan:
+    runs-on: self-hosted
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      # Step 4: Verify SonarQube Connection
+      - name: Verify SonarQube Connection
+        run: |
+          echo "Testing connection to SonarQube..."
+          curl -I http://192.168.0.135:9000 || exit 1
+
+      # Step 5: Run SonarQube Scanner
+      - name: Run SonarQube Scanner
+        env:
+          SONAR_SCANNER_OPTS: "-Dsonar.host.url=http://192.168.0.135:9000 -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}"
+        run: |
+          /home/runner/sonar-scanner/bin/sonar-scanner -X \
+            -Dsonar.projectKey=Automated-CI-CD \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://192.168.0.135:9000 \
+            -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+
+      # Step 6: Clean up SonarQube container after analysis
+      - name: Clean up SonarQube container
+        if: always()
+        run: |
+          docker stop sonar
+          docker rm sonar
+
+
+  update-helm-chart:
+    runs-on: ubuntu-latest
+    needs: sonarQubeScan
+
+    steps:
+      # Step 7: Checkout the repository for Helm chart update
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 8: Update the tag in the Helm chart values.yaml file
+      - name: Update Tag in Helm Chart
+        run: |
+          sed -i 's/tag:.*/tag: "${{ github.run_id }}"/' application-game-charts/values.yaml
+
+      # Step 9: Commit and push the updated Helm chart
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.email "omraut0508@gmail.com"
+          git config --global user.name "om0508"
+          git add application-game-charts/values.yaml
+          git commit -m "Update tag in Helm chart"
+          git push
