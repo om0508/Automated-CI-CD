@@ -81,11 +81,11 @@ jobs:
           curl -u admin:admin -X POST "http://localhost:9000/api/user_tokens/generate" -d "name=my-token&login=admin"
           curl -u admin:admin "http://localhost:9000/api/projects/search"
 
-          /opt/sonar-scanner/bin/sonar-scanner -X \
-            -Dsonar.projectKey=Automated-Ci-CD \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} \
-            -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+          sonar-scanner \
+          -Dsonar.projectKey=test_project \
+          -Dsonar.host.url=http://localhost:9000 \
+          -Dsonar.token=squ_780cfe35f0cf79e05a58ac389b71d475a62f4d43
+
 
   update-helm-chart:
     runs-on: ubuntu-latest
