@@ -87,7 +87,6 @@ jobs:
           /opt/sonar-scanner/bin/sonar-scanner \
           -Dsonar.projectKey=test_project \
           -Dsonar.host.url=http://localhost:9000 \
-          -Dsonar.token=$SONAR_TOKEN
 
 
   update-helm-chart:
