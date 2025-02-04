@@ -92,6 +92,8 @@ jobs:
           -Dsonar.login=$SONAR_TOKEN \
           -Dsonar.projectBaseDir=$(pwd)
 
+          curl -I http://localhost:9000/dashboard?id=test_project
+
 
   update-helm-chart:
     runs-on: ubuntu-latest
