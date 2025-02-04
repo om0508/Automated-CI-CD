@@ -76,6 +76,11 @@ jobs:
         env:
           SONAR_SCANNER_OPTS: "-Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}"
         run: |
+          hostname -I
+          curl -u admin:admin -X POST "http://localhost:9000/api/projects/create?project=test_project&name=Test_Project"
+          curl -u admin:admin -X POST "http://localhost:9000/api/user_tokens/generate" -d "name=my-token&login=admin"
+          curl -u admin:admin "http://localhost:9000/api/projects/search"
+
           /opt/sonar-scanner/bin/sonar-scanner -X \
             -Dsonar.projectKey=Automated-Ci-CD \
             -Dsonar.sources=. \
