@@ -84,7 +84,7 @@ jobs:
           -d "name=my-auto-token&login=admin" | grep -o '"token":"[^"]*' | cut -d '"' -f 4)
           curl -u admin:admin "http://localhost:9000/api/projects/search"
 
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \
           -Dsonar.projectKey=test_project \
           -Dsonar.host.url=http://localhost:9000 \
           -Dsonar.token=$SONAR_TOKEN
