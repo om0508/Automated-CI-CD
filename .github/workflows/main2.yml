@@ -54,7 +54,7 @@ jobs:
           echo "Waiting for SonarQube to be ready..."
           until curl -s ${{ secrets.SONARQUBE_HOST }}/api/system/status | grep -q '"status":"UP"'; do
             echo "Waiting for SonarQube..."
-            sleep 10
+            sleep 1
           done
 
       - name: Install SonarQube Scanner
@@ -77,7 +77,7 @@ jobs:
           SONAR_SCANNER_OPTS: "-Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}"
         run: |
           /opt/sonar-scanner/bin/sonar-scanner -X \
-            -Dsonar.projectKey=Automated-Ci-CD\
+            -Dsonar.projectKey=Automated-Ci-CD \
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} \
             -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
