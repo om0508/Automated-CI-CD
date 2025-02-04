@@ -86,7 +86,7 @@ jobs:
           
           curl -u admin:admin "http://localhost:9000/api/projects/search"
           mkdir /home/runner/work/Automated-CI-CD/Automated-CI-CD/src
-          /opt/sonar-scanner/bin/sonar-scanner -X \
+          /opt/sonar-scanner/bin/sonar-scanner \
           -Dsonar.projectKey=test_project \
           -Dsonar.host.url=http://localhost:9000 \
           -Dsonar.login=$SONAR_TOKEN \
