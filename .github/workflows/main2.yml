@@ -79,13 +79,13 @@ jobs:
           hostname -I
 
           curl -u admin:admin -X POST "http://localhost:9000/api/projects/create?project=test_project&name=Test_Project"
-          
+                    
           export SONAR_TOKEN=$(curl -s -u "admin:admin" -X POST \
           "http://localhost:9000/api/user_tokens/generate" \
           -d "name=my-auto-token&login=admin" | grep -o '"token":"[^"]*' | cut -d '"' -f 4)
           
           curl -u admin:admin "http://localhost:9000/api/projects/search"
-
+          mkdir /home/runner/work/Automated-CI-CD/Automated-CI-CD/src
           /opt/sonar-scanner/bin/sonar-scanner -X \
           -Dsonar.projectKey=test_project \
           -Dsonar.host.url=http://localhost:9000 \
