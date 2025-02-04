@@ -77,7 +77,7 @@ jobs:
           SONAR_SCANNER_OPTS: "-Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}"
         run: |
           /opt/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey=Your_Project_Key \
+            -Dsonar.projectKey=Automated-Ci-CD\
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} \
             -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
