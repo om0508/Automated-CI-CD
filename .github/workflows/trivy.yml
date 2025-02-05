@@ -63,7 +63,7 @@ jobs:
 
       - name: Generate SBOM using Syft
         run: |
-          syft . -o cyclonedx-json > sbom.json  # Generate SBOM using Syft in JSON format
+          syft . -o cyclonedx-xml > sbom.xml  # Use CycloneDX XML format
 
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
         run: |
@@ -75,7 +75,7 @@ jobs:
 
       - name: Run Trivy SBOM Scan (Dependency Vulnerabilities)
         run: |
-          trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.json
+          trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.xml
 
       - name: Upload Trivy FS Scan Results
         uses: actions/upload-artifact@v4
