@@ -110,7 +110,7 @@ jobs:
             -Dsonar.projectKey=om0508_Automated-CI-CD
             -Dsonar.organization=om0508
             -Dsonar.host.url="https://sonarcloud.io"
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
             -Dsonar.sarifReportPaths=trivy-results.sarif,trivy-image-results.sarif
 
   update-helm-chart:
