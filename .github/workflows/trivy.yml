@@ -57,19 +57,27 @@ jobs:
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
-      # Run Trivy File System Scan (scans repository files & dependencies)
+      # Run Trivy FS Scan (source code vulnerabilities)
       - name: Run Trivy FS Scan
-        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL --format table . | tee trivy-results.txt
+        run: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-results.sarif .
 
-      # Run Trivy Image Scan (scans built Docker image)
+      # Run Trivy Image Scan (Docker vulnerabilities)
       - name: Run Trivy Image Scan
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
+        run: |
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-image-results.sarif ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }}
 
-      - name: Upload Trivy Scan Results
+      - name: Upload Trivy FS Scan Results
         uses: actions/upload-artifact@v4
         with:
           name: trivy-results
-          path: trivy-results.txt
+          path: trivy-results.sarif
+
+      - name: Upload Trivy Image Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image-results
+          path: trivy-image-results.sarif
 
   sonarcloud:
     name: SonarCloud Scan
@@ -81,10 +89,29 @@ jobs:
         with:
           fetch-depth: 0  # Required for proper analysis
 
-      - name: SonarCloud Scan
+      - name: Download Trivy FS Scan Results
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-results
+          path: .
+
+      - name: Download Trivy Image Scan Results
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-image-results
+          path: .
+
+      - name: Run SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=om0508_Automated-CI-CD
+            -Dsonar.organization=om0508
+            -Dsonar.host.url="https://sonarcloud.io"
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.sarifReportPaths=trivy-results.sarif,trivy-image-results.sarif
 
   update-helm-chart:
     runs-on: ubuntu-latest
