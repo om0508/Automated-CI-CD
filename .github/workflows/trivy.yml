@@ -60,9 +60,9 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
 
       # Generate SBOM using Syft
-      - name: Generate SBOM
+      - name: Generate SBOM using Trivy
         run: |
-          syft . -o cyclonedx-json > sbom.json
+          trivy shom --format cyclonedx ---output shom.json
 
       # Run Trivy FS Scan (Source Code Vulnerabilities)
       - name: Run Trivy FS Scan
