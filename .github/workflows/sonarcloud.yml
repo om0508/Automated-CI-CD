@@ -1,5 +1,4 @@
 name: CI
-
 permissions:
   contents: write
 
@@ -59,14 +58,6 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=om0508
-            -Dsonar.projectKey=Automated-CI-CD
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.qualitygate.wait=true  # Ensure the scan completes before proceeding
-            -Dsonar.sources=.
-            -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/node_modules/**
 
   update-helm-chart:
     runs-on: ubuntu-latest
