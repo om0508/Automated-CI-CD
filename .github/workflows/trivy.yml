@@ -1,0 +1,106 @@
+name: CI
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'helm/**'
+      - 'Readme.md'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Debug Environment Variables
+        run: |
+          echo "Checking if secrets are available..."
+          echo "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}"
+          echo "Checking Docker Status..."
+          docker version
+
+      - name: Setup Docker Build
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }}
+          platforms: linux/amd64,linux/arm64
+
+  trivy-security-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      # Run Trivy File System Scan (scans repository files & dependencies)
+      - name: Run Trivy FS Scan
+        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL --format table . | tee trivy-results.txt
+
+      # Run Trivy Image Scan (scans built Docker image)
+      - name: Run Trivy Image Scan
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
+
+      - name: Upload Trivy Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-results.txt
+
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    needs: trivy-security-scan  # Ensures Trivy runs before SonarQube
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for proper analysis
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  update-helm-chart:
+    runs-on: ubuntu-latest
+    needs: sonarcloud
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Update Helm Chart Tag
+        run: |
+          sed -i 's/tag: .*/tag: "${{ github.run_id }}"/' application-game-charts/values.yaml
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.email "omraut0508@gmail.com"
+          git config --global user.name "om0508"
+          git add application-game-charts/values.yaml
+          git commit -m "Update tag in Helm chart"
+          git push
