@@ -59,25 +59,25 @@ jobs:
           syft . -o cyclonedx-xml > sbom.xml  # Use CycloneDX XML format
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
         run: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table .  # Output in tabular format
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table . > trivy-fs-results.txt
       - name: Run Trivy Image Scan (Container Image Vulnerabilities)
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-results.table ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-results.txt ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
       - name: Upload Trivy FS Scan Results
         uses: actions/upload-artifact@v4
         with:
           name: trivy-fs-results
-          path: trivy-results.sarif
+          path: trivy-fs-results.txt
       - name: Upload Trivy Image Scan Results
         uses: actions/upload-artifact@v4
         with:
           name: trivy-image-results
-          path: trivy-image-results.sarif
+          path: trivy-image-results.txt
       - name: Upload Trivy SBOM Scan Results
         uses: actions/upload-artifact@v4
         with:
           name: trivy-sbom-results
-          path: trivy-sbom-results.sarif
+          path: sbom.xml
 
   update-helm-chart:
     name: Update Helm Chart
