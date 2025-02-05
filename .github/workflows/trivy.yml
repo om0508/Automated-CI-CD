@@ -53,13 +53,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Install Syft
+        run: |
+          curl -sSL https://github.com/anchore/syft/releases/download/v0.56.0/syft_0.56.0_linux_amd64.tar.gz | tar xz -C /usr/local/bin syft
+
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
       - name: Generate SBOM using Syft
         run: |
-          syft . -o cyclonedx-json > sbom.xml # Generate SBOM using Syft in JSON format
+          syft . -o cyclonedx-json > sbom.json  # Generate SBOM using Syft in JSON format
 
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
         run: |
@@ -71,7 +75,7 @@ jobs:
 
       - name: Run Trivy SBOM Scan (Dependency Vulnerabilities)
         run: |
-          trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.xml
+          trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.json
 
       - name: Upload Trivy FS Scan Results
         uses: actions/upload-artifact@v4
