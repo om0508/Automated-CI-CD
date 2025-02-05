@@ -61,7 +61,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
       - name: Generate SBOM using Syft
         run: |
-            syft . -o cyclonedx-xml > sbom.xml
+            syft . -o cyclonedx-xml > sbom.json
 
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
         run: |
@@ -71,8 +71,7 @@ jobs:
           trivy image --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-image-results.sarif ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
       - name: Run Trivy SBOM Scan (Dependency Vulnerabilities)
         run: |
-         trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.xml 
-      - name: Upload Trivy FS Scan Results
+         trivy sbom --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-sbom-results.sarif sbom.json 
         uses: actions/upload-artifact@v4
         with:
           name: trivy-fs-results
