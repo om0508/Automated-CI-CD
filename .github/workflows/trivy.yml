@@ -57,7 +57,7 @@ jobs:
 
       - name: Generate SBOM using Trivy
         run: |
-          trivy sbom --format cyclonedx -o sbom.json .
+          trivy sbom --format cyclonedx --scanners vuln -o sbom.json .
 
 
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
