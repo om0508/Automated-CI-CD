@@ -55,13 +55,9 @@ jobs:
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
-      - name: Install Syft (for SBOM generation)
+      - name: Generate SBOM using Trivy
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
-
-      - name: Generate SBOM using Syft
-        run: |
-          syft . -o cyclonedx-json > sbom.json
+          trivy sbom --format cyclonedx-json -o sbom.json .
 
       - name: Run Trivy FS Scan (Source Code Vulnerabilities)
         run: |
