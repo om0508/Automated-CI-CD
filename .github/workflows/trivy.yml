@@ -110,4 +110,6 @@ jobs:
           git config --global user.name "om0508"
           git add application-game-charts/values.yaml
           git commit -m "Update tag in Helm chart"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/om0508/Automated-CI-CD.git
+          git push origin main
           git push
