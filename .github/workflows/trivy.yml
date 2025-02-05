@@ -62,7 +62,7 @@ jobs:
       # Generate SBOM using Syft
       - name: Generate SBOM using Trivy
         run: |
-          trivy shom --format cyclonedx ---output shom.json
+          trivy shom --format cyclonedx ---output shom.json .
 
       # Run Trivy FS Scan (Source Code Vulnerabilities)
       - name: Run Trivy FS Scan
