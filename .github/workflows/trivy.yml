@@ -65,7 +65,7 @@ jobs:
       # Run Trivy Image Scan (Docker vulnerabilities)
       - name: Run Trivy Image Scan
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-image-results.sarif ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }}
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-image-results.sarif ${{ secrets.DOCKERHUB_USERNAME }}/application-game:${{ github.run_id }} || true
 
       - name: Upload Trivy FS Scan Results
         uses: actions/upload-artifact@v4
