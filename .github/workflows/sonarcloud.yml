@@ -71,6 +71,7 @@ jobs:
         run: |
           curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
           unzip dependency-check-8.4.0-release.zip -d dependency-check
+          ls -R dependency-check
           chmod +x dependency-check/bin/dependency-check.sh
 
       - name: Run OWASP Dependency-Check
