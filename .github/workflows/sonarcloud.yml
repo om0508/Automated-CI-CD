@@ -122,10 +122,10 @@ jobs:
           git add application-game-charts/values.yaml          
           git commit -m "Update tag in Helm chart" || echo "No changes to commit."          
 
-          # Pull latest changes, automatically resolve conflicts, and push safely
-          git pull origin main --rebase || (git rebase --abort && git pull --no-rebase) || exit 1
+          # Pull latest changes and automatically resolve conflicts, then continue rebase
+          git pull origin main --rebase --autostash || (git rebase --abort && git pull --no-rebase) || exit 1
           
-          # Use Git to resolve merge conflicts automatically by accepting the version from the current branch
-          git merge --strategy-option theirs --no-edit || echo "Merge conflict occurred, check manually."
+          # Handle any rebase conflict by skipping commit if necessary
+          git rebase --continue || git rebase --skip || echo "Rebase skipped or failed, manual conflict resolution required."
           
           git push origin main || echo "Push failed. You might need to resolve conflicts manually."
