@@ -68,26 +68,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Verify Dependency-Check Directory
+        run: |
+          echo "Checking if dependency-check directory exists..."
+          if [ -d "dependency-check" ]; then
+            echo "Dependency-Check directory already exists."
+          else
+            echo "Error: Dependency-Check directory does not exist!" && exit 1
+          fi
+
+      - name: Set up OWASP Dependency-Check
+        run: |
+          echo "Setting up OWASP Dependency-Check..."
+          curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip dependency-check-8.4.0-release.zip -d dependency-check
+          echo "Extracting contents..."
+          ls -R dependency-check
+          chmod +x dependency-check/bin/dependency-check.sh
+
       - name: List Extracted Files for Debugging
         run: |
           echo "Listing all files in dependency-check directory:"
           find dependency-check
-
-      - name: Set up OWASP Dependency-Check
-        run: |
-          curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
-          unzip dependency-check-8.4.0-release.zip -d dependency-check
-          ls -R dependency-check
-          chmod +x dependency-check/bin/dependency-check.sh
-
-      - name: Verify Dependency-Check Directory
-        run: |
-          if [ -d "dependency-check" ]; then
-            echo "Dependency-Check directory exists."
-          else
-            echo "Error: Dependency-Check directory does not exist!" && exit 1
-          fi
-          ls -R dependency-check/dependency-check
 
       - name: Run OWASP Dependency-Check
         run: |
