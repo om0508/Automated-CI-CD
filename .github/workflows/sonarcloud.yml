@@ -1,4 +1,5 @@
 name: CI
+
 permissions:
   contents: write
 
@@ -67,10 +68,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-  - name: List Extracted Files for Debugging
-     run: |
-      echo "Listing all files in dependency-check directory:"
-      find dependency-check
+      - name: List Extracted Files for Debugging
+        run: |
+          echo "Listing all files in dependency-check directory:"
+          find dependency-check
 
       - name: Set up OWASP Dependency-Check
         run: |
