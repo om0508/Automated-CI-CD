@@ -72,7 +72,7 @@ jobs:
         run: |
           echo "Downloading OWASP Dependency-Check..."
           curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
-          unzip dependency-check-8.4.0-release.zip -d dependency-check
+          unzip -o dependency-check-8.4.0-release.zip -d dependency-check || { echo "Unzip failed!"; exit 1; }
           echo "Extracted files:"
           ls -R dependency-check
 
@@ -85,26 +85,19 @@ jobs:
             echo "Error: Dependency-Check directory does not exist!" && exit 1
           fi
 
-      - name: List All Files in Dependency-Check Directory for Debugging
-        run: |
-          echo "Listing all files in dependency-check directory:"
-          find dependency-check
-
-      - name: Check File Structure of Dependency-Check
-        run: |
-          echo "Inspecting the directory structure:"
-          ls -R dependency-check
-
       - name: Locate dependency-check.sh Script
         run: |
-          echo "Searching for dependency-check.sh script in the extracted files..."
-          find dependency-check -name "dependency-check.sh"
+          echo "Searching for dependency-check.sh script..."
+          find dependency-check -type f -name "dependency-check.sh" > script_path.txt
+          cat script_path.txt || { echo "Script not found!"; exit 1; }
 
       - name: Run OWASP Dependency-Check
         run: |
           echo "Running Dependency-Check..."
-          if [ -f "dependency-check/bin/dependency-check.sh" ]; then
-            dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports
+          script_path=$(cat script_path.txt)
+          if [ -f "$script_path" ]; then
+            chmod +x "$script_path"
+            "$script_path" --scan . --format "HTML" --out reports
           else
             echo "Error: dependency-check.sh script not found!" && exit 1
           fi
