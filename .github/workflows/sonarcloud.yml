@@ -1,4 +1,5 @@
-name: CI
+name: CI/CD Pipeline
+
 permissions:
   contents: write
 
