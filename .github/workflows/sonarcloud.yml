@@ -73,7 +73,7 @@ jobs:
           echo "Downloading OWASP Dependency-Check..."
           curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
           unzip dependency-check-8.4.0-release.zip -d dependency-check
-          echo "Extracted to:"
+          echo "Extracted files:"
           ls -R dependency-check
 
       - name: Verify Dependency-Check Directory
@@ -85,15 +85,15 @@ jobs:
             echo "Error: Dependency-Check directory does not exist!" && exit 1
           fi
 
-      - name: List Extracted Files for Debugging
+      - name: List All Files in Dependency-Check Directory for Debugging
         run: |
           echo "Listing all files in dependency-check directory:"
           find dependency-check
 
-      - name: Verify Dependency-Check Script Location
+      - name: Check File Structure of Dependency-Check
         run: |
-          echo "Checking for the script location..."
-          ls dependency-check/bin
+          echo "Inspecting the directory structure:"
+          ls -R dependency-check
 
       - name: Run OWASP Dependency-Check
         run: |
