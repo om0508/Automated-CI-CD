@@ -95,6 +95,11 @@ jobs:
           echo "Inspecting the directory structure:"
           ls -R dependency-check
 
+      - name: Locate dependency-check.sh Script
+        run: |
+          echo "Searching for dependency-check.sh script in the extracted files..."
+          find dependency-check -name "dependency-check.sh"
+
       - name: Run OWASP Dependency-Check
         run: |
           echo "Running Dependency-Check..."
