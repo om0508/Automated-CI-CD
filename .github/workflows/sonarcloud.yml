@@ -85,16 +85,16 @@ jobs:
           unzip -o dependency-check-8.4.0-release.zip -d dependency-check || { echo "Unzip failed!"; exit 1; }
           echo "Extracted files:"
           ls -R dependency-check
-          # Check if dependency-check.sh exists and is in the correct location
-          ls dependency-check/bin/
+          # Check if dependency-check.sh exists in the correct location
+          ls dependency-check/dependency-check/bin/
 
       - name: Run OWASP Dependency-Check
         run: |
           echo "Running Dependency-Check..."
-          if [ -f "dependency-check/bin/dependency-check.sh" ]; then
+          if [ -f "dependency-check/dependency-check/bin/dependency-check.sh" ]; then
             # Ensure the script has execution permissions before running it
-            chmod +x dependency-check/bin/dependency-check.sh
-            dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports || { echo "Dependency-Check failed!"; exit 1; }
+            chmod +x dependency-check/dependency-check/bin/dependency-check.sh
+            dependency-check/dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports || { echo "Dependency-Check failed!"; exit 1; }
           else
             echo "Error: dependency-check.sh script not found!" && exit 1
           fi
