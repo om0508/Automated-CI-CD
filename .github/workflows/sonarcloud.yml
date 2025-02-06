@@ -74,7 +74,7 @@ jobs:
           curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
           unzip dependency-check-8.4.0-release.zip -d dependency-check
           echo "Extracted to:"
-          ls -d dependency-check*
+          ls -R dependency-check
 
       - name: Verify Dependency-Check Directory
         run: |
@@ -90,9 +90,19 @@ jobs:
           echo "Listing all files in dependency-check directory:"
           find dependency-check
 
+      - name: Verify Dependency-Check Script Location
+        run: |
+          echo "Checking for the script location..."
+          ls dependency-check/bin
+
       - name: Run OWASP Dependency-Check
         run: |
-          dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports
+          echo "Running Dependency-Check..."
+          if [ -f "dependency-check/bin/dependency-check.sh" ]; then
+            dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports
+          else
+            echo "Error: dependency-check.sh script not found!" && exit 1
+          fi
 
       - name: Upload OWASP Report as Artifact
         uses: actions/upload-artifact@v4
