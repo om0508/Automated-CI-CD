@@ -71,6 +71,8 @@ jobs:
       - name: Install .NET 6.0 Runtime (Required for Dependency-Check)
         run: |
           echo "Installing .NET 6.0 Runtime..."
+          wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          sudo dpkg -i packages-microsoft-prod.deb
           sudo apt-get update
           sudo apt-get install -y dotnet-runtime-6.0
           dotnet --version || { echo "Failed to install .NET!"; exit 1; }
@@ -118,5 +120,5 @@ jobs:
         run: |
           git add application-game-charts/values.yaml
           git commit -m "Update tag in Helm chart" || echo "No changes to commit."
-          git pull origin main --rebase || git rebase --abort
-          git push origin main
+          git pull --rebase origin main || (echo "Rebase failed, resetting..." && git rebase --abort)
+          git push origin main || (echo "Push failed, retrying..." && git pull --rebase origin main && git push origin main)
