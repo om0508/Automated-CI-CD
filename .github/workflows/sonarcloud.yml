@@ -68,6 +68,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Install .NET 6.0 Runtime (Required for Dependency-Check)
+        run: |
+          echo "Installing .NET 6.0 Runtime..."
+          sudo apt-get update
+          sudo apt-get install -y dotnet-runtime-6.0
+          dotnet --version || { echo "Failed to install .NET!"; exit 1; }
+
       - name: Download and Extract OWASP Dependency-Check
         run: |
           echo "Downloading OWASP Dependency-Check..."
@@ -76,28 +83,11 @@ jobs:
           echo "Extracted files:"
           ls -R dependency-check
 
-      - name: Verify Dependency-Check Directory
-        run: |
-          echo "Checking if dependency-check directory exists..."
-          if [ -d "dependency-check" ]; then
-            echo "Dependency-Check directory exists."
-          else
-            echo "Error: Dependency-Check directory does not exist!" && exit 1
-          fi
-
-      - name: Locate dependency-check.sh Script
-        run: |
-          echo "Searching for dependency-check.sh script..."
-          find dependency-check -type f -name "dependency-check.sh" > script_path.txt
-          cat script_path.txt || { echo "Script not found!"; exit 1; }
-
       - name: Run OWASP Dependency-Check
         run: |
           echo "Running Dependency-Check..."
-          script_path=$(cat script_path.txt)
-          if [ -f "$script_path" ]; then
-            chmod +x "$script_path"
-            "$script_path" --scan . --format "HTML" --out reports
+          if [ -f "dependency-check/bin/dependency-check.sh" ]; then
+            dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports || { echo "Dependency-Check failed!"; exit 1; }
           else
             echo "Error: dependency-check.sh script not found!" && exit 1
           fi
