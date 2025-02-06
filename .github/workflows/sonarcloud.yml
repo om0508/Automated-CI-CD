@@ -1,5 +1,4 @@
 name: CI
-
 permissions:
   contents: write
 
@@ -120,5 +119,5 @@ jobs:
         run: |
           git add application-game-charts/values.yaml
           git commit -m "Update tag in Helm chart" || echo "No changes to commit."
-          git pull --rebase origin main || (echo "Rebase failed, resetting..." && git rebase --abort)
-          git push origin main || (echo "Push failed, retrying..." && git pull --rebase origin main && git push origin main)
+          git pull origin main --rebase || git rebase --abort
+          git push origin main
