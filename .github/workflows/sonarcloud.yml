@@ -77,12 +77,7 @@ jobs:
 
     - name: Commit and Push Changes
       run: |
-        git pull origin main --rebase
-        if git diff --quiet; then
-          echo "No changes to commit."
-        else
-          git add application-game-charts/values.yaml
-          git commit -m "Update tag in Helm chart"
-          git push origin main
-        fi
-
+        git add application-game-charts/values.yaml
+        git commit -m "Update tag in Helm chart" || echo "No changes to commit."
+        git pull origin main --rebase || git rebase --abort
+        git push origin main
