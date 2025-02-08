@@ -1,0 +1,95 @@
+name: CI-CD-Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository        
+        uses: actions/checkout@v4        
+
+      - name: SonarCloud Scan        
+        uses: SonarSource/sonarqube-scan-action@v4        
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Notify Slack (SonarQube Completed)
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "✅ *SonarQube scan completed successfully!*"
+
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    needs: sonarcloud
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Scan
+        run: |
+          docker run --rm -v $(pwd):/app aquasec/trivy image my-app-image:latest > trivy-report.txt
+
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy-Scan-Report
+          path: trivy-report.txt
+
+      - name: Notify Slack (Trivy Completed)
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "✅ *Trivy security scan completed successfully!*"
+
+  owasp-check:
+    name: OWASP Dependency-Check
+    runs-on: ubuntu-latest
+    needs: trivy-scan
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency-Check
+        run: |
+          curl -sLO https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip -o dependency-check-8.4.0-release.zip -d dependency-check
+          dependency-check/bin/dependency-check.sh --scan . --format "HTML" --out reports
+
+      - name: Upload OWASP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: OWASP-Dependency-Check-Report
+          path: reports/
+
+      - name: Notify Slack (OWASP Completed)
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "✅ *OWASP Dependency-Check completed successfully!*"
+
+  deploy-argocd:
+    name: Deploy to ArgoCD
+    runs-on: ubuntu-latest
+    needs: owasp-check
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to ArgoCD
+        run: |
+          argocd app sync my-app --grpc-web
+          argocd app wait my-app --health
+
+      - name: Notify Slack (ArgoCD Deployment Completed)
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "🚀 *ArgoCD Deployment completed successfully!*"
