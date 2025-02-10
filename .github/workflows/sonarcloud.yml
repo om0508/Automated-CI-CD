@@ -22,9 +22,7 @@ jobs:
 
       - name: Debug Environment Variables
         run: |
-          echo "Checking if secrets are available..."
           echo "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}"
-          echo "Checking Docker Status..."
           docker version
 
       - name: Setup Docker Build
@@ -53,13 +51,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for proper analysis
+          fetch-depth: 0
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true  # Ensures pipeline continues even if SonarCloud fails
+        continue-on-error: true  # Allows the pipeline to proceed even if SonarCloud fails
 
   update-helm-chart:
     runs-on: ubuntu-latest
@@ -81,5 +79,5 @@ jobs:
         run: |
           git add application-game-charts/values.yaml
           git commit -m "Update tag in Helm chart" || echo "No changes to commit."
-          git pull --rebase origin main || git rebase --abort
+          git pull origin main --rebase || git rebase --abort
           git push origin main
